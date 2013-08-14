@@ -1,14 +1,22 @@
 {
     "name": "groundctrl/ipn-log-parser",
     "description": "A parser for ground(ctrl) IPN logs",
-    "require": {
-        "ddtraceweb/monolog-parser": "dev-master"
-    },
     "license": "MIT",
-    "authors": [
+    "authors":
+    [
         {
             "name": "Michael Crumm",
             "email": "mike.crumm@groundctrl.com"
         }
-    ]
+    ],
+    "require": {
+        "symfony/console": "~2.3",
+        "ddtraceweb/monolog-parser": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Gctrl\\IpnLogParser": "src/"
+        }
+    },
+    "bin": [ "bin/ipnlog" ]
 }
