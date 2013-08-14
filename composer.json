@@ -1,0 +1,14 @@
+{
+    "name": "groundctrl/ipn-log-parser",
+    "description": "A parser for ground(ctrl) IPN logs",
+    "require": {
+        "ddtraceweb/monolog-parser": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Crumm",
+            "email": "mike.crumm@groundctrl.com"
+        }
+    ]
+}
