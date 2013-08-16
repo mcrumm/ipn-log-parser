@@ -9,13 +9,19 @@
             "email": "mike.crumm@groundctrl.com"
         }
     ],
+    "repositories": [
+      {
+        "type": "vcs",
+        "url": "https://github.com/mcrumm/monolog-parser.git"
+      }
+    ],
     "require": {
-        "symfony/console": "~2.3",
-        "ddtraceweb/monolog-parser": "dev-master"
+        "cilex/cilex": "~1.0",
+        "ddtraceweb/monolog-parser": "dev-bug/context"
     },
     "autoload": {
         "psr-0": {
-            "Gctrl\\IpnLogParser": "src/"
+            "Gctrl": "src/"
         }
     },
     "bin": [ "bin/ipnlog" ]

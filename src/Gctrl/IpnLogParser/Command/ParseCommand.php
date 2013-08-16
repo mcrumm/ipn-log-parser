@@ -2,13 +2,11 @@
 
 namespace Gctrl\IpnLogParser\Command;
 
-use Symfony\Component\Console\Command\Command,
-    Symfony\Component\Console\Input\InputArgument,
+use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
-use Dubture\Monolog\Reader\LogReader;
 
-class ParseCommand extends Command
+class ParseCommand extends AbstractLogCommand
 {
     /**
      * {@inheritdoc}
@@ -21,7 +19,7 @@ class ParseCommand extends Command
 				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.')
 			))
 			->setHelp(<<<EOT
-The <info>%command.name%</info> command remove the branch subdomain from the staging environment.
+The <info>%command.name%</info> command parses an IPN log file.
 EOT
 			);
     }
@@ -31,12 +29,10 @@ EOT
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $path   = $input->getArgument('path');
-
         try {
-            $reader = new LogReader($path);
-        }
-        catch (\RuntimeException $fileProblem) {
+            $path   = $input->getArgument('path');
+            $reader = $this->getReader($path);
+        } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
             return;
         }
@@ -46,9 +42,9 @@ EOT
         foreach ($reader as $log) {
 
             if (isset($log['date'])) {
-                $output->writeln($log['date']->format('Y-m-d h:i:s') . ' - ' . $log['message']);
+                $output->writeln($log['date']->format('Y-m-d h:i:s') . ' - ' . $log['level']);
             } else {
-                $output->writeln($log['message']);
+                $output->writeln($log['level']);
             }
 
             if (isset($log['context'])) {
