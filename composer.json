@@ -10,14 +10,10 @@
         }
     ],
     "repositories": [
-      {
-        "type": "vcs",
-        "url": "https://github.com/mcrumm/monolog-parser.git"
-      }
     ],
     "require": {
         "cilex/cilex": "~1.0",
-        "ddtraceweb/monolog-parser": "dev-bug/context"
+        "ddtraceweb/monolog-parser": "dev-master"
     },
     "autoload": {
         "psr-0": {

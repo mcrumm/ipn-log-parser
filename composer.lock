@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "6e081baeb71a54235d3f17d6c98eb00d",
+    "hash": "a9e7393d3a5c774adf472a9f8a56a578",
     "packages": [
         {
             "name": "cilex/cilex",
@@ -125,16 +125,16 @@
         },
         {
             "name": "ddtraceweb/monolog-parser",
-            "version": "dev-bug/context",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mcrumm/monolog-parser.git",
-                "reference": "95d8d1a3e8614a6607db51509e02fd77b8c5ea68"
+                "url": "https://github.com/ddtraceweb/monolog-parser.git",
+                "reference": "0.0.8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcrumm/monolog-parser/zipball/95d8d1a3e8614a6607db51509e02fd77b8c5ea68",
-                "reference": "95d8d1a3e8614a6607db51509e02fd77b8c5ea68",
+                "url": "https://api.github.com/repos/ddtraceweb/monolog-parser/zipball/0.0.8",
+                "reference": "0.0.8",
                 "shasum": ""
             },
             "require": {
@@ -149,6 +149,7 @@
                     "Dubture": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -159,10 +160,7 @@
                 }
             ],
             "description": "A parser for monolog log entries",
-            "support": {
-                "source": "https://github.com/mcrumm/monolog-parser/tree/bug/context"
-            },
-            "time": "2013-08-16 20:42:18"
+            "time": "2013-08-17 08:30:12"
         },
         {
             "name": "monolog/monolog",
