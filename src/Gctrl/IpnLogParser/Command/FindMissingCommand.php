@@ -163,10 +163,10 @@ EOT
 
         foreach ($missing as $request) {
             $table->addRow($this->getTableRowForRequest($request));
-        }
+            }
 
         return $table;
-    }
+        }
 
     public function getTableRowForRequest(array $request)
     {
