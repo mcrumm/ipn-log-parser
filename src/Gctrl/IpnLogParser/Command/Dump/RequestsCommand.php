@@ -6,6 +6,7 @@ use Dubture\Monolog\Reader\LogReader;
 use Gctrl\IpnLogParser\Command\AbstractLogCommand;
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
 
 class RequestsCommand extends AbstractLogCommand
@@ -18,7 +19,8 @@ class RequestsCommand extends AbstractLogCommand
         $this->setName('dump:requests')
             ->setDescription('Dumps request object data.')
             ->setDefinition(array(
-				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.')
+				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
+                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to check', 0),
 			))
 			->setHelp(<<<EOT
 The <info>%command.name%</info> command dumps requests objects from the IPN log.
@@ -32,9 +34,10 @@ EOT
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $path = $input->getArgument('path');
+        $days = $input->getOption('days');
 
         try {
-            $reader = $this->getReader($path);
+            $reader = $this->getReader($path, $days);
             $this->dumpRequests($reader, $output);
         } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
