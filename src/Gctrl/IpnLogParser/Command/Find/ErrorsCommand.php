@@ -3,7 +3,8 @@
 namespace Gctrl\IpnLogParser\Command\Find;
 
 use Dubture\Monolog\Reader\LogReader;
-use Gctrl\IpnLogParser\Command\AbstractLogCommand;
+use Gctrl\IpnLogParser\Command\AbstractLogCommand,
+    Gctrl\IpnLogParser\Filter\LogLevelFilter;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
@@ -20,8 +21,9 @@ class ErrorsCommand extends AbstractLogCommand
         $this->setName('find:errors')
             ->setDescription('Finds errors in the log.')
             ->setDefinition(array(
-				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
+                new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
                 new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search.', 0),
+                new InputOption('dump', 'u', InputOption::VALUE_NONE, 'Dump error lines', null),
 			))
 			->setHelp(<<<EOT
 The <info>%command.name%</info> command finds request errors from the IPN log.
@@ -34,15 +36,23 @@ EOT
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $input->getArgument('path');
-        $days = $input->getOption('days');
+        $path  = $input->getArgument('path');
+        $days  = $input->getOption('days');
+        $dump  = $input->getOption('dump');
 
         try {
             $reader = $this->getReader($path, $days);
-            $this->dumpErrors($reader, $output);
         } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
         }
+
+        if (!$dump) {
+            $count = $this->printTable($reader, $output);
+        } else {
+            $count = $this->dumpErrors($reader, $output);
+        }
+
+        $output->writeln(sprintf('Found %d errors in the log.', $count));
     }
 
     /**
@@ -55,22 +65,54 @@ EOT
      */
     public function dumpErrors(LogReader $reader, OutputInterface $output)
     {
-        $errors = 0;
+        $errors = new LogLevelFilter($reader, LogLevel::ERROR);
+        $rows   = 0;
 
-        foreach ($reader as $log) {
-            if (LogLevel::ERROR !== strtolower($log['level'])) {
-                continue;
+        foreach ($errors as $error) {
+            $request = isset($error['context'][1]) ? $error['context'][1] : false;
+
+            if (!$request) { continue; }
+
+            $rows++;
+
+            $output->writeln(sprintf('%d) %s', $rows, $error['message']));
+
+            if (isset($error['date'])) {
+                $output->writeln($error['date']->format('Y-m-d H:i:s'));
             }
 
-            $output->writeln(++$errors . '. ' . $log['message']);
-
-            if (isset($log['date'])) {
-                $output->writeln($log['date']->format('Y-m-d H:i:s'));
-            }
-            $output->writeln(print_r($log['context'][1], true));
+            $output->writeln(print_r($request, true));
             $output->writeln(str_pad('', 80, '-'));
         }
 
-        $output->writeln(sprintf('Found %d errors in the log.', $errors));
+        return $rows;
+    }
+
+    public function printTable(LogReader $reader, OutputInterface $output)
+    {
+        $table  = $this->getHelperSet()->get('table');        
+        $errors = new LogLevelFilter($reader, LogLevel::ERROR);
+        $rows   = 0;
+
+        $table->setHeaders(array('Date', 'Transaction Type', 'Payment Status', 'Order #'));
+
+        foreach ($errors as $error) {
+            $request = isset($error['context'][1]) ? $error['context'][1] : false;
+
+            if (!$request) { continue; }
+
+            $rows++;
+
+            $table->addRow(array(
+                is_object($error['date']) ? $error['date']->format('Y-m-d H:i:s') : '',
+                isset($request['txn_type']) ? $request['txn_type'] : '',
+                isset($request['payment_status']) ? $request['payment_status'] : '',
+                isset($request['invoice']) ? $request['invoice'] : '',
+            ));
+        }
+
+        $table->render($output);
+
+        return $rows;
     }
 }
