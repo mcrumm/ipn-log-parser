@@ -29,7 +29,7 @@ class MissingCommand extends AbstractLogCommand
             ->setDescription('Finds error requests that have not yet been retried.')
             ->setDefinition(array(
 				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
-                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search. Default: 0', 0),
+                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search.', 0),
                 new InputOption('show-query', 'o', InputOption::VALUE_NONE, 'Show select query'),
 			))
 			->setHelp(<<<EOT
