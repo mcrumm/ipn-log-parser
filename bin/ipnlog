@@ -25,10 +25,10 @@ if ((!$loader = includeIfExists(__DIR__.'/../vendor/autoload.php')) && (!$loader
 
 $app = new Application('ground(ctrl) IPN Log Parser', GCTRL_IPNLOG_VERSION);
 
+$app->command(new Command\Dump\ErrorsCommand());
+$app->command(new Command\Dump\RequestsCommand());
+$app->command(new Command\Find\MissingCommand());
 $app->command(new Command\Log\CombineCommand());
-$app->command(new Command\DumpErrorsCommand());
-$app->command(new Command\DumpRequestsCommand());
-$app->command(new Command\FindMissingCommand());
 $app->command(new Command\ParseCommand());
 
 $app->run();

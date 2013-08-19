@@ -1,15 +1,16 @@
 <?php
 
-namespace Gctrl\IpnLogParser\Command;
+namespace Gctrl\IpnLogParser\Command\Find;
 
 use Dubture\Monolog\Reader\LogReader;
+use Gctrl\IpnLogParser\Command\AbstractLogCommand;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Helper\TableHelper,
     Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
-class FindMissingCommand extends AbstractLogCommand
+class MissingCommand extends AbstractLogCommand
 {
     protected $transactions;
 
@@ -129,7 +130,13 @@ EOT
 
     public function getRequest($log)
     {
-        return $log['context'][1];
+        $request = $log['context'][1];
+
+        if ($log['date'] instanceof \DateTime) {
+            $request['date'] = $log['date']->format('Y-m-d H:i:s');
+        }
+
+        return $request;
     }
 
     public function getTransactionId(array $request)
@@ -154,6 +161,7 @@ EOT
         $missing = array_diff_key($this->transactions, $this->corrections);
 
         $table->setHeaders(array(
+            'Date',
             'ID',
             'Type',
             'Payment Status',
@@ -163,14 +171,15 @@ EOT
 
         foreach ($missing as $request) {
             $table->addRow($this->getTableRowForRequest($request));
-            }
+        }
 
         return $table;
-        }
+    }
 
     public function getTableRowForRequest(array $request)
     {
         return array(
+            isset($request['date']) ? $request['date'] : 'UNKNOWN',
             $request['txn_id'],
             isset($request['txn_type']) ? $request['txn_type'] : '-',
             isset($request['payment_status']) ? $request['payment_status'] : '-',

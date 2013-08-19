@@ -1,26 +1,28 @@
 <?php
 
-namespace Gctrl\IpnLogParser\Command;
+namespace Gctrl\IpnLogParser\Command\Dump;
 
 use Dubture\Monolog\Reader\LogReader;
+use Gctrl\IpnLogParser\Command\AbstractLogCommand;
+use Psr\Log\LogLevel;
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
-class DumpRequestsCommand extends AbstractLogCommand
+class ErrorsCommand extends AbstractLogCommand
 {
     /**
      * {@inheritdoc}
      */
     public function configure()
     {
-        $this->setName('dump:requests')
-            ->setDescription('Dumps request object data.')
+        $this->setName('dump:errors')
+            ->setDescription('Dumps errors in the log.')
             ->setDefinition(array(
 				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.')
 			))
 			->setHelp(<<<EOT
-The <info>%command.name%</info> command dumps requests objects from the IPN log.
+The <info>%command.name%</info> command dumps request errors from the IPN log.
 EOT
 			);
     }
@@ -34,26 +36,38 @@ EOT
 
         try {
             $reader = $this->getReader($path);
-            $this->dumpRequests($reader, $output);
+            $this->dumpErrors($reader, $output);
         } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
         }
     }
 
     /**
-     * Dump Requests
+     * Dump Errors
      *
      * @param \Dubture\Monolog\Reader\LogReader $reader
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      *
      * @return void
      */
-    public function dumpRequests(LogReader $reader, OutputInterface $output)
+    public function dumpErrors(LogReader $reader, OutputInterface $output)
     {
+        $errors = 0;
+
         foreach ($reader as $log) {
-            if (isset($log['context']) && count($log['context']) > 1 ) {
-                $output->writeln(json_encode($log['context'][1]));
+            if (LogLevel::ERROR !== strtolower($log['level'])) {
+                continue;
             }
+
+            $output->writeln(++$errors . '. ' . $log['message']);
+
+            if (isset($log['date'])) {
+                $output->writeln($log['date']->format('Y-m-d H:i:s'));
+            }
+            $output->writeln(print_r($log['context'][1], true));
+            $output->writeln(str_pad('', 80, '-'));
         }
+
+        $output->writeln(sprintf('Found %d errors in the log.', $errors));
     }
 }
