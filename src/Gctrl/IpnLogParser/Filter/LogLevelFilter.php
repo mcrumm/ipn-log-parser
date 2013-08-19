@@ -24,11 +24,8 @@ class LogLevelFilter extends \FilterIterator
      */
     public function accept()
     {
-        $log = parent::current();
+        $log = $this->current();
 
-        $result = isset($log['level'])
-                && 0 === strcasecmp($log['level'], $this->logLevel);
-
-        return $result;
+        return isset($log['level']) && 0 === strcasecmp($log['level'], $this->logLevel);
     }
 }
