@@ -8,6 +8,7 @@ use Psr\Log\LogLevel;
 use Symfony\Component\Console\Helper\TableHelper,
     Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
 
 class MissingCommand extends AbstractLogCommand
@@ -27,7 +28,8 @@ class MissingCommand extends AbstractLogCommand
         $this->setName('find:missing')
             ->setDescription('Finds error requests that have not yet been retried.')
             ->setDefinition(array(
-				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.')
+				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
+                new InputOption('show-query', 'o', InputOption::VALUE_NONE, 'Show select query'),
 			))
 			->setHelp(<<<EOT
 The <info>%command.name%</info> loops through requests, looking for errors and
@@ -45,7 +47,10 @@ EOT
 
         try {
             $reader = $this->getReader($path);
-            $this->dumpErrors($reader, $output);
+            $this->showMissing($reader, $output);
+            if ($input->getOption('show-query')) {
+                $this->showQuery($output);
+            }
         } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
         }
@@ -59,7 +64,7 @@ EOT
      *
      * @return void
      */
-    public function dumpErrors(LogReader $reader, OutputInterface $output)
+    public function showMissing(LogReader $reader, OutputInterface $output)
     {
         $txnErrors      = $this->gatherErrorTransactions($reader);
         $txnCorrections = $this->gatherCorrectedTransactions($reader);
@@ -186,5 +191,22 @@ EOT
             isset($request['reason_code']) ? $request['reason_code'] : '-',
             $request['invoice']
         );
+    }
+
+    public function showQuery(OutputInterface $output)
+    {
+        $missing = array_diff_key($this->transactions, $this->corrections);
+        $query   = "SELECT * FROM orders WHERE order_num IN ('%s')";
+        $nums    = array();
+
+        foreach ($missing as $request) {
+            if (!isset($request['invoice']) || empty($request['invoice'])) {
+                continue;
+            }
+
+            $nums[] = $request['invoice'];
+        }
+
+        $output->writeln(sprintf($query, implode("','", $nums)));
     }
 }
