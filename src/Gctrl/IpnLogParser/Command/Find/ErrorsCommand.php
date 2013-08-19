@@ -1,6 +1,6 @@
 <?php
 
-namespace Gctrl\IpnLogParser\Command\Dump;
+namespace Gctrl\IpnLogParser\Command\Find;
 
 use Dubture\Monolog\Reader\LogReader;
 use Gctrl\IpnLogParser\Command\AbstractLogCommand;
@@ -17,14 +17,14 @@ class ErrorsCommand extends AbstractLogCommand
      */
     public function configure()
     {
-        $this->setName('dump:errors')
-            ->setDescription('Dumps errors in the log.')
+        $this->setName('find:errors')
+            ->setDescription('Finds errors in the log.')
             ->setDefinition(array(
 				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
-                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to check', 0),
+                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search.', 0),
 			))
 			->setHelp(<<<EOT
-The <info>%command.name%</info> command dumps request errors from the IPN log.
+The <info>%command.name%</info> command finds request errors from the IPN log.
 EOT
 			);
     }

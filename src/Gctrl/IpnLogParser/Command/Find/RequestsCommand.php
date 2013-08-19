@@ -1,6 +1,6 @@
 <?php
 
-namespace Gctrl\IpnLogParser\Command\Dump;
+namespace Gctrl\IpnLogParser\Command\Find;
 
 use Dubture\Monolog\Reader\LogReader;
 use Gctrl\IpnLogParser\Command\AbstractLogCommand;
@@ -16,11 +16,11 @@ class RequestsCommand extends AbstractLogCommand
      */
     public function configure()
     {
-        $this->setName('dump:requests')
-            ->setDescription('Dumps request object data.')
+        $this->setName('find:requests')
+            ->setDescription('Finds request object data.')
             ->setDefinition(array(
 				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
-                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to check', 0),
+                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search. Default: 0', 0),
 			))
 			->setHelp(<<<EOT
 The <info>%command.name%</info> command dumps requests objects from the IPN log.

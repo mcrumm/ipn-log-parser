@@ -1,9 +1,11 @@
 <?php
 
-namespace Gctrl\IpnLogParser\Command;
+namespace Gctrl\IpnLogParser\Command\Log;
 
+use Gctrl\IpnLogParser\Command\AbstractLogCommand;
 use Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
 
 class ParseCommand extends AbstractLogCommand
@@ -13,10 +15,11 @@ class ParseCommand extends AbstractLogCommand
      */
     public function configure()
     {
-        $this->setName('parse')
+        $this->setName('log:parse')
             ->setDescription('Parses a ground(ctrl) IPN log.')
             ->setDefinition(array(
-				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.')
+				new InputArgument('path', InputArgument::REQUIRED, 'The path to the log file.'),
+                new InputOption('days', 'd', InputOption::VALUE_REQUIRED, 'The number of days to search. Default: 0', 0),
 			))
 			->setHelp(<<<EOT
 The <info>%command.name%</info> command parses an IPN log file.
@@ -29,15 +32,15 @@ EOT
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $path   = $input->getArgument('path');
+        $days   = $input->getOption('days');
+
         try {
-            $path   = $input->getArgument('path');
-            $reader = $this->getReader($path);
+            $reader = $this->getReader($path, $days);
         } catch (\RuntimeException $fileProblem) {
             $output->writeln(sprintf('<error>The file "%s" could not be opened.', $path));
             return;
         }
-
-        $output->writeln(sprintf('Found %d records in the log.', count($reader)));
 
         foreach ($reader as $log) {
 
@@ -57,5 +60,7 @@ EOT
                 }
             }
         }
+
+        $output->writeln(sprintf('Found %d records in the log.', count($reader)));
     }
 }

@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputArgument,
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * LogsCombineCommand
+ * CombineCommand
  *
  * @author Michael Crumm <mike.crumm@groundctrl.com>
  */
@@ -37,7 +37,7 @@ class CombineCommand extends Command
      */
     public function configure()
     {
-        $this->setName('logs:combine')
+        $this->setName('log:combine')
             ->setDefinition(array(
                 new InputArgument('paths', InputArgument::OPTIONAL|InputArgument::IS_ARRAY, 'The path(s) to the log file(s).', null),
                 new InputOption('outfile', 'o', InputArgument::OPTIONAL, 'Where to write the combined log file.', null)
