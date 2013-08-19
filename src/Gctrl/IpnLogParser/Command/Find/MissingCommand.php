@@ -152,7 +152,7 @@ EOT
 
     public function getTransactionId(array $request)
     {
-        return $request['txn_id'];
+        return $request['ipn_track_id'];
     }
 
     public function isErrorLine($log)
