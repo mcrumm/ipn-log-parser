@@ -127,8 +127,10 @@ EOT
             $txn_id  = $this->getTransactionId($request);
 
             if (array_key_exists($txn_id, $this->transactions)) {
-                $corrected++;
-                $this->corrections[$txn_id] = $request;
+                if (!array_key_exists($txn_id, $this->corrections)) {
+                    $corrected++;
+                    $this->corrections[$txn_id] = $request;
+                }
             }
         }
 
@@ -139,8 +141,10 @@ EOT
     {
         $request = $log['context'][1];
 
+        $request['log_message'] = $log['message'];
+
         if ($log['date'] instanceof \DateTime) {
-            $request['date'] = $log['date']->format('Y-m-d H:i:s');
+            $request['log_date'] = $log['date']->format('Y-m-d H:i:s');
         }
 
         return $request;
@@ -173,7 +177,8 @@ EOT
             'Type',
             'Payment Status',
             'Reason',
-            'Order #'
+            'Order #',
+            'Log Message',
         ));
 
         foreach ($missing as $request) {
@@ -186,12 +191,13 @@ EOT
     public function getTableRowForRequest(array $request)
     {
         return array(
-            isset($request['date']) ? $request['date'] : 'UNKNOWN',
+            isset($request['log_date']) ? $request['log_date'] : 'UNKNOWN',
             $request['txn_id'],
             isset($request['txn_type']) ? $request['txn_type'] : '-',
             isset($request['payment_status']) ? $request['payment_status'] : '-',
             isset($request['reason_code']) ? $request['reason_code'] : '-',
-            $request['invoice']
+            $request['invoice'],
+            $request['log_message']
         );
     }
 
