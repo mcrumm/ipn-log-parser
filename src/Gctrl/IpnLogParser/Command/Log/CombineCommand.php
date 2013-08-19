@@ -3,9 +3,10 @@
 namespace Gctrl\IpnLogParser\Command\Log;
 
 use Cilex\Command\Command;
-use Symfony\Component\Console\Input\InputInterface,
+use Symfony\Component\Console\Input\InputArgument,
+    Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\DialogHelper;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -37,6 +38,10 @@ class CombineCommand extends Command
     public function configure()
     {
         $this->setName('logs:combine')
+            ->setDefinition(array(
+                new InputArgument('paths', InputArgument::OPTIONAL|InputArgument::IS_ARRAY, 'The path(s) to the log file(s).', null),
+                new InputOption('outfile', 'o', InputArgument::OPTIONAL, 'Where to write the combined log file.', null)
+            ))
             ->setDescription('Combine multiple logs into a single file.');
     }
 
@@ -49,6 +54,26 @@ class CombineCommand extends Command
         $this->filesystem = new Filesystem();
         $this->dialog     = $this->getHelperSet()->get('dialog');
 
+        $paths   = $input->getArgument('paths');
+        $outFile = $input->getOption('outfile');
+
+        if (empty($paths)) {
+            $this->doFilePromptLoop();
+        } else {
+            $this->validateInputPaths($paths);
+        }
+
+        if (null === $outFile) {
+            $outFile = $this->promptForOutFile();
+        }
+
+        $bytes = $this->combineLogs($outFile);
+
+        $output->writeln(sprintf('<info>%d total bytes written to %s</info>', $bytes, $outFile));
+    }
+
+    public function doFilePromptLoop()
+    {
         do {
             $file = $this->promptForFile();
 
@@ -62,11 +87,18 @@ class CombineCommand extends Command
             }
 
         } while(null !== $file);
+    }
 
-        $outFile = $this->promptForOutFile();
-        $bytes   = $this->combineLogs($outFile);
+    public function validateInputPaths(array $paths)
+    {
+        foreach ($paths as $path) {
 
-        $output->writeln(sprintf('<info>%d total bytes written to %s</info>', $bytes, $outFile));
+            if (!$this->isRealFile($path)) {
+               throw new \InvalidArgumentException(sprintf('The file "%s" does not exist.', $path)); 
+            }
+
+            $this->files[] = $path;
+        }
     }
 
     public function promptForFile()
