@@ -94,7 +94,7 @@ EOT
         $errors = new LogLevelFilter($reader, LogLevel::ERROR);
         $rows   = 0;
 
-        $table->setHeaders(array('Date', 'Transaction Type', 'Payment Status', 'Order #'));
+        $table->setHeaders(array('Date', 'Transaction Type', 'Payment Status', 'Transaction ID', 'Order #', 'Log Message'));
 
         foreach ($errors as $error) {
             $request = isset($error['context'][1]) ? $error['context'][1] : false;
@@ -107,7 +107,9 @@ EOT
                 is_object($error['date']) ? $error['date']->format('Y-m-d H:i:s') : '',
                 isset($request['txn_type']) ? $request['txn_type'] : '',
                 isset($request['payment_status']) ? $request['payment_status'] : '',
+                isset($request['txn_id']) ? $request['txn_id'] : '',
                 isset($request['invoice']) ? $request['invoice'] : '',
+                $error['message']
             ));
         }
 
